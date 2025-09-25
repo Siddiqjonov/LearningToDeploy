@@ -9,11 +9,8 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        var conn = $"Host={Environment.GetEnvironmentVariable("PGHOST")};" +
-                   $"Port={Environment.GetEnvironmentVariable("PGPORT") ?? "5432"};" +
-                   $"Username={Environment.GetEnvironmentVariable("PGUSER")};" +
-                   $"Password={Environment.GetEnvironmentVariable("PGPASSWORD")};" +
-                   $"Database={Environment.GetEnvironmentVariable("PGDATABASE")};Pooling=true;";
+        var conn = Environment.GetEnvironmentVariable("DATABASE_URL")
+            ?? throw new InvalidOperationException("DATABASE_URL not configured");
 
         builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(conn));
         builder.Services.AddControllers();
@@ -31,10 +28,8 @@ public static class Program
             app.UseSwaggerUI();
         }
 
-        // Allow Railway to set the port
-        var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-        app.Urls.Add($"http://*:{port}");
-
+        // Railway injects PORT env var
+        app.Urls.Add("http://0.0.0.0:" + (Environment.GetEnvironmentVariable("PORT") ?? "8080"));
         app.MapControllers();
         app.Run();
     }
