@@ -31,8 +31,9 @@ public static class Program
             app.UseSwaggerUI();
         }
 
-        if (!app.Environment.IsProduction())
-            app.UseHttpsRedirection();
+        // Allow Railway to set the port
+        var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+        app.Urls.Add($"http://*:{port}");
 
         app.MapControllers();
         app.Run();
